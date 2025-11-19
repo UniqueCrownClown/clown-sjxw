@@ -34,3 +34,24 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## other
+
+```bash
+npx create-next-app@latest
+
+pnpm install langchain @langchain/deepseek @langchain/core
+
+pnpm dlx shadcn@latest init
+
+pnpm install lucide
+
+pnpm add sonner tailwindcss-animate @tailwindcss/typography
+
+pnpm dlx shadcn@latest add button input scroll-area select avatar
+
+pnpm install react-markdown remark-gfm rehype-highlight highlight.js
+
+pnpm dlx shadcn@latest add sidebar
+
+```
