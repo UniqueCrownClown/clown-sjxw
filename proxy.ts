@@ -18,7 +18,7 @@ export default clerkMiddleware((auth, request) => {
   }
   // 若访问受保护路由且未登录，自动重定向到登录页
   if (isProtectedRoute(request)) {
-    auth().protect();
+    auth.protect();
   }
 });
 
