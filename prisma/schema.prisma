@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Todo {
+  id        Int      @id @default(autoincrement())
+  text      String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+// 用户表
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  role      String   @default("USER") // 增加 role 字段，默认值为 "USER"
+  name      String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  likes     Like[]
+  favorites Favorite[]
+}
+
+
+// 网站表
+model Website {
+  id          String         @id @default(cuid()) // 唯一 ID
+  name        String         // 网站名称
+  url         String         @unique // 网站链接，确保唯一
+  iconUrl     String        // 网站图标 URL
+  description String        // 网站描述
+  categories  WebsiteCategory[] // 通过中间表关联多个分类
+  tags        String[]       // 网站标签，数组格式
+  views       Int            @default(0) // 访问统计，默认 0
+  createdAt   DateTime       @default(now()) // 创建时间
+  updatedAt   DateTime       @updatedAt // 更新时间
+  @@index([tags]) // 添加 GIN 索引以加速标签搜索
+  likes       Like[]
+  favorites   Favorite[]
+}
+
+// 点赞与收藏
+model Like {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  websiteId String
+  createdAt DateTime @default(now())
+  @@unique([userId, websiteId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  website   Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  websiteId String
+  createdAt DateTime @default(now())
+  @@unique([userId, websiteId])
+}
+
+// 分类表
+model Category {
+  id        String            @id @default(cuid()) // 唯一 ID
+  name      String            @unique // 分类名称，如 "AI 编程"
+  slug      String            @unique // 友好的 URL 标识，如 "ai-programming"
+  icon      String?           // 分类图标名称 (Lucide图标)
+  websites  WebsiteCategory[] // 通过中间表关联多个网站
+  createdAt DateTime          @default(now()) // 创建时间
+  updatedAt DateTime          @updatedAt // 更新时间
+}
+
+// 中间表，用于关联网站和分类
+model WebsiteCategory {
+  websiteId    String
+  categoryId   String
+  website      Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([websiteId, categoryId]) // 组合主键，确保唯一
+}
+
+// 网站统计
+model Visit {
+  id        String   @id @default(cuid())
+  createdAt String
+  ip        String   // 实际存储格式: {IP}_{UserAgent}，用于区分相同IP不同设备的访问
+  userAgent String?
+  path      String   @default("/")
+}
+
+// 唯一访客表
+model UniqueVisitor {
+  id         String   @id @default(cuid())
+  ip         String   @unique // 实际存储格式: {IP}_{UserAgent}，用于区分相同IP不同设备的访客
+  firstVisit String
+  lastVisit  String
+  visitCount Int      @default(1) // 访问次数，默认 1
+}
+
+// 网站访问统计
+model VisitStats {
+  id          String   @id @default("singleton")
+  count       Int      @default(0)
+  uniqueCount Int      @default(0)
+  updatedAt   String 
+}
+
+// 弹幕留言
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  author    String
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // New fields for replies
+  parentId  String?
+  parent    Message?  @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Message[] @relation("MessageReplies")
+  
+  // New fields for reactions
+  likes     Int       @default(0)
+  isPinned  Boolean   @default(false)
+
+  // 新增用户头像字段
+  avatarUrl String?
+}
+
+model UserCount {
+  id    String @id @default("singleton")
+  count Int    @default(0)
+}
+
+// 日志表
+model Log {
+  id        String   @id @default(cuid())
+  title     String   // 日志标题
+  content   String   // 日志内容
+  isPinned  Boolean  @default(false) // 是否置顶
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// imageConfig
+model ImageConfig {
+  id        String   @id @default(cuid())
+  labels    String
+  type      String
+  url       String
+  content   String
+  img_url   String
+  date_str  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+// article
+model Article {
+  id           String   @id @default(cuid())
+  title        String
+  author       String?
+  type         String
+  flag         String?
+  images       String?
+  labels       String
+  likes        String?
+  collection   String?
+  comment      String?
+  views        String?
+  createdAt    DateTime @default(now()) 
+  publish_time DateTime @updatedAt
+  sync_status  String?   @default("0")
+  static_url   String
+}
+
+// article_content
+model ArticleContent {
+id         String   @id @default(cuid())
+article_id String
+content    String
+keyword    String?
+}

@@ -12,50 +12,86 @@ export default function Home() {
 
   // 获取 Todos
   const fetchTodos = async () => {
-    const response = await fetch("/api/todos");
-    const data = await response.json();
-    setTodos(data);
+    try {
+      const response = await fetch("/api/todos");
+      const data = await response.json();
+      setTodos(data);
+    } catch (error) {
+      console.error("获取 todos 失败:", error);
+    }
   };
 
   // 添加 Todo
   const addTodo = async () => {
     if (!newTodo.trim()) return;
 
-    await fetch("/api/todos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: newTodo }),
-    });
+    try {
+      await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: newTodo }),
+      });
 
-    setNewTodo("");
-    fetchTodos();
+      setNewTodo("");
+      fetchTodos();
+    } catch (error) {
+      console.error("添加 todo 失败:", error);
+    }
   };
 
   // 切换 Todo 状态
   const toggleTodo = async (id: number, completed: boolean) => {
-    await fetch("/api/todos", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, completed }),
-    });
+    try {
+      await fetch("/api/todos", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, completed }),
+      });
 
-    fetchTodos();
+      fetchTodos();
+    } catch (error) {
+      console.error("更新 todo 失败:", error);
+    }
   };
 
   // 删除 Todo
   const deleteTodo = async (id: number) => {
-    await fetch("/api/todos", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    try {
+      await fetch("/api/todos", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
 
-    fetchTodos();
+      fetchTodos();
+    } catch (error) {
+      console.error("删除 todo 失败:", error);
+    }
   };
 
   // 组件挂载时获取 Todos
   useEffect(() => {
-    fetchTodos();
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/todos");
+        const data = await response.json();
+        if (isMounted) {
+          setTodos(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error("获取 todos 失败:", error);
+        }
+      }
+    };
+    
+    fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

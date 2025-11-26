@@ -54,4 +54,8 @@ pnpm install react-markdown remark-gfm rehype-highlight highlight.js
 
 pnpm dlx shadcn@latest add sidebar
 
+pnpm dlx shadcn@latest add dropdown-menu tooltip
+
+pnpm dlx shadcn@latest add dropdown-menu input select tabs label
+
 ```
